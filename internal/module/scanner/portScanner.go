@@ -7,6 +7,7 @@ import (
 
 	"github.com/alazarbeyenenew2/devopsmon/internal/constant"
 	"github.com/alazarbeyenenew2/devopsmon/internal/constant/dto"
+	"github.com/alazarbeyenenew2/devopsmon/internal/constant/errors"
 	"go.uber.org/zap"
 )
 
@@ -36,12 +37,16 @@ func (s *scanner) PortScanner(ctx context.Context, req dto.PortScannerReq) ([]dt
 
 	if req.StartPort == 0 && req.Type != constant.PORT_SCANNER_TYPE_SINGLE {
 		s.log.Error("please provide port number", zap.Any("req", req))
-		return []dto.PortScannerRes{}, fmt.Errorf("please provide port number")
+		err := fmt.Errorf("please provide port number")
+		err = errors.ErrInvalidUserInput.Wrap(err, err.Error())
+		return []dto.PortScannerRes{}, err
 	}
 
 	if req.Type == constant.PORT_SCANNER_TYPE_RANGE && (req.StartPort > req.EndPort || req.EndPort <= 0 || req.StartPort < 0) {
 		s.log.Error("please provide port number", zap.Any("req", req))
-		return []dto.PortScannerRes{}, fmt.Errorf("please provide valid start and end ip address")
+		err := fmt.Errorf("please provide valid start and end ip address")
+		err = errors.ErrInvalidUserInput.Wrap(err, err.Error())
+		return []dto.PortScannerRes{}, err
 	}
 
 	ports := make(chan int, req.NumberOfThreads)
